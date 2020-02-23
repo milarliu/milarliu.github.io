@@ -4,7 +4,7 @@
 
 ### Product Launch Recommendation for EarlyRiders (Toy Horse Manufacturer) - Conjoint Analysis with R
 
-**[View Project Summary on Github](https://github.com/milarliu/milarliu.github.io/blob/master/Product%20Launch%20Recommendation%20for%20EarlyRider.pdf)**
+**[View Project Report on Github](https://github.com/milarliu/milarliu.github.io/blob/master/Product%20Launch%20Recommendation%20for%20EarlyRider.pdf)**
 
 **[Download R Markdown Appendix on Github](https://github.com/milarliu/milarliu.github.io/blob/master/Product%20Launch%20Recommendation%20for%20EarlyRider_Code.Rmd)**
 
@@ -18,7 +18,7 @@
 
 ### Pricing Strategy for Iron Mountain (Information Management Services Company) - Business Intelligence with R, Python and Pricefx
 
-**[View Project Summary on Github](https://github.com/milarliu/milarliu.github.io/blob/master/Pricing%20Strategy%20for%20Iron%20Mountain.pdf)**
+**[View Project Report on Github](https://github.com/milarliu/milarliu.github.io/blob/master/Pricing%20Strategy%20for%20Iron%20Mountain.pdf)**
 
 > I worked with four amazing teammates - Andy (Jiangcheng) Lin, Echo (Yuqiao) Zhong, Kaili Tan, and Yuheng Xiong. We were honored to win the first place in this case competition.
 
@@ -30,10 +30,14 @@
 
 ---
 
+### Credit Risk Prediction Analysis and Interactive Interface for Home Equity Line of Credit (HELOC) applications - Machine Learning with Python
 
+**[View Project Report on Github](https://github.com/milarliu/milarliu.github.io/blob/master/Credit%20Risk%20Analysis%20for%20HELOC.pdf)**
 
+**[View ipynb Notebook Appendix on Github](https://github.com/milarliu/milarliu.github.io/blob/master/Credit%20Risk%20Analysis%20for%20HELOC_Code.ipynb)**
 
+> In this academic project, we developed a predictive model and a decision support system (DSS) that evaluates the risk of HELOC applications. Data provided by FICO Community: https://community.fico.com/s/explainable-machine-learning-challenge. 
 
----
-<p style="font-size:11px">Page template forked from <a href="https://github.com/evanca/quick-portfolio">evanca</a></p>
-<!-- Remove above link if you don't want to attibute -->
+> We trained machine learning models (including Logistic Regression, KNN, SVM, Single Decision Tree, Bagging, Boosting, and Random Forest) to evaluate risk of credit card application. To make it user-friendly for sales representatives in a bank or credit card company to decide on accepting or rejecting applications, we designed interactive interface prototype that can be used to optimize decision-making in applicants screening process.
+
+![notebook preview](Credit%20Risk%20Analysis%20for%20HELOC_Preview.png)
