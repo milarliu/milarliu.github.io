@@ -12,7 +12,7 @@
 
 > In the conjoint analysis to optimize product launch decision, we executed benefit segmentation (including a-priori and post-hoc) and market simulation. We identified configuration of potential product profiles that gains the most market share, and eventually achieved potential profit uplift amounting to $40,000.
 
-![notebook preview](https://github.com/milarliu/milarliu.github.io/blob/master/Product%20Launch%20Recommendation_Preview.png)
+![notebook preview](Product%20Launch%20Recommendation_Preview.png)
 
 
 
