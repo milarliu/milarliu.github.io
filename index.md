@@ -1,33 +1,14 @@
-## Portfolio
+## Projects
 
 ---
 
-### Category Name 1 
+###  Product Launch Recommendation for EarlyRider (Toy Horse manufacturer) - Conjoint Analysis with R
 
-[Project 1 Title](/sample_page)
-<img src="images/dummy_thumbnail.jpg?raw=true"/>
-
----
-[Project 2 Title](/pdf/sample_presentation.pdf)
-<img src="images/dummy_thumbnail.jpg?raw=true"/>
-
----
-[Project 3 Title](http://example.com/)
-<img src="images/dummy_thumbnail.jpg?raw=true"/>
-
+**[Download report summary on Github]
+(https://github.com/milarliu/milarliu.github.io/blob/master/Product%20Launch%20Recommendation%20for%20EarlyRider.pdf)**
 ---
 
-### Category Name 2
-
-- [Project 1 Title](http://example.com/)
-- [Project 2 Title](http://example.com/)
-- [Project 3 Title](http://example.com/)
-- [Project 4 Title](http://example.com/)
-- [Project 5 Title](http://example.com/)
-
 ---
-
-
 
 
 ---
