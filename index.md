@@ -41,3 +41,29 @@
 > We trained machine learning models (including Logistic Regression, KNN, SVM, Single Decision Tree, Bagging, Boosting, and Random Forest) to evaluate risk of credit card application. To make it user-friendly for sales representatives in a bank or credit card company to decide on accepting or rejecting applications, we designed interactive interface prototype that can be used to optimize decision-making in applicants screening process.
 
 ![notebook preview](Credit%20Risk%20Analysis%20for%20HELOC_Preview.png)
+
+---
+
+### 911 Call Reasons Analysis (Data from Kaggle) - Exploratory Data Analysis with Python 
+
+**[View ipynb Notebook Appendix on Github](https://github.com/milarliu/milarliu.github.io/blob/master/911%20Call%20Reasons%20Analysis_Code.ipynb)**
+
+> In this exploratory project, I analyzed the data of 911 calls in the United States by utilizing Pandas for data analytics and Seaborn for data visulization. I looked into key variables including the call location, key reason, peak of call time and call type. 
+
+![notebook preview](911%20Call%20Analysis_Preview.png)
+
+---
+
+### Twitter Sentiment Analysis - Natural Language Processing with Python
+
+**[View ipynb Notebook Appendix on Github](https://github.com/milarliu/milarliu.github.io/blob/master/Twitter%20Sentiment%20Analysis.ipynb)**
+
+> In this academic project, each row of the dataframe contains a tweet sent by a customer to an airline, most of which are negative. The task is to find out those tweets that are not negative by conducting a NLP analysis to predict the label of each observation.
+
+> I Tokenized and vectorized tweets sent by clients to airlines using TF-DIF and bag-of-words model. By Utilizing Naïve-Bayes algorithm and random forest model, I classified unlabeled tweets, and eventually achieving 75% precision of classification.
+
+![notebook preview](Twitter%20Sentiment%20Analysis_Preview.png)
+
+---
+
+### More projects in progress...
