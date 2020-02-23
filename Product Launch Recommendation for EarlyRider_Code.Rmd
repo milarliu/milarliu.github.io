@@ -1,0 +1,345 @@
+---
+title: "HW3 Analytics Design"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+loading the required package and set the working directory
+
+```{r functions}
+
+#setwd("~/Desktop/UR/Yr1/SpringA/GBA424/HW/HW3")
+load('GBA424 - Toy Horse Case Data.Rdata')
+require("cluster")
+require("fpc")
+require("factoextra")
+require("gridExtra")
+library(cluster)
+library(fpc)
+library(factoextra)
+library(gridExtra)
+
+```
+
+###############################################PART A##################################################
+In this part, we subset the conjoint data into two groups, with NA and without NA. Then, we Run regression to estimate the model at individual level, build up the dataframe of all regression results and re-assigned values for missing ratings.
+
+```{r part A}
+
+# Subset the conjoint data, divide it into rows with NA and without NA
+cj.na = conjointData[is.na(conjointData$ratings), ]
+cj = conjointData[!is.na(conjointData$ratings), ]
+
+# Run regression to estimate the conjoint model at individual level
+intercept = c()
+price_low = c()
+size_large = c()
+motion_roc = c()
+style_glm = c()
+for (i in 1:max(cj$ID)){
+  cj.sub = cj[cj$ID==i, ]
+  model = lm(ratings ~ factor(price)+factor(size)+factor(motion)+factor(style), data=cj.sub)
+      # build up the dataframe of all regression results (part-utilities)
+  intercept = append(intercept, model$coefficients[1])
+  price_low = append(price_low, model$coefficients[2])
+  size_large = append(size_large, model$coefficients[3])
+  motion_roc = append(motion_roc, model$coefficients[4])
+  style_glm = append(style_glm, model$coefficients[5])
+      # produce predictions for missing profiles
+  for (j in 1:4){
+    cj.na[cj.na$ID==i, ]$ratings[j] = predict(model, cj.na[cj.na$ID==i, ][j, 4:7])
+  }
+}
+# dataframe of all regression, each for an individual respondent
+coef.indi = data.frame(intercept, price_low, size_large, motion_roc, style_glm)
+head(coef.indi)
+# check predictions for missing profiles
+head(cj.na)
+# combine the missing profiles with existing profiles
+cj = rbind(cj, cj.na)
+cj = cj[order(c(cj[,'ID']), cj[,'profile']),]
+head(cj, 16)
+
+```
+
+###############################################PART B##################################################
+In this part, we evaluate number of clusters to use on data with visualizations. We define the clustTest function and apply to the dataset coef.indi resulted from part A, and find that the optimal number of clusters is 3. Along with 2, 4, 5, we tested these clusters and eliminated 2, 4, 5 because of overlaping. 
+With 3 segments, consumer's preferences could be assigned into profile 4, 14, and 16.
+
+```{r art B}
+# Evaluate number of clusters to use on data with visualizations
+  # Results:
+  # a list of weighted sum of squares and the pamk output including optimal number of clusters (nc)
+  # to create visualizations need to print tmp
+
+clustTest = function(toClust, print=TRUE, scale=TRUE, maxClusts=15, seed=16, nstart=10, iter.max=100){
+  if(scale){toClust = scale(toClust);}
+  set.seed(16);   # set random number seed before doing cluster analysis
+  wss <- (nrow(toClust)-1)*sum(apply(toClust, 2, var))
+  for (i in 2:maxClusts) wss[i] <- sum(kmeans(toClust, centers=i, nstart=nstart, iter.max=iter.max)$withinss)
+  # gpw essentially does the following plot using wss above. 
+  # plot(1:maxClusts, wss, type="b", xlab="Number of Clusters",ylab="Within groups sum of squares")
+  gpw = fviz_nbclust(toClust,kmeans,method="wss",iter.max=iter.max,nstart=nstart,k.max=maxClusts) 
+        #alternative way to get wss elbow chart
+  pm1 = pamk(toClust,scaling=TRUE)
+  ## pm1$nc indicates the optimal number of clusters based on 
+  ## lowest average silhoutte score (a measure of quality of clustering)
+  #alternative way that presents it visually as well.
+  gps = fviz_nbclust(toClust, kmeans, method="silhouette", iter.max=iter.max, nstart=nstart, k.max=maxClusts) 
+  if(print){
+    grid.arrange(gpw,gps, nrow = 1)
+  }
+  list(wss=wss, pm1=pm1$nc, gpw=gpw, gps=gps)
+}
+
+# Apply to dataset coef.indi
+checks = clustTest(coef.indi, print=TRUE, scale=TRUE, maxClusts=15, seed=16,nstart=10, iter.max=100)
+# Optimal number of clusters: 3
+
+# Test four cluster analysis schemes (i.e. number of cluster): 2, 3, 4, 5
+  # Run a set of clusters as kmeans
+  # Return:
+  # list of 
+    # kms, kmeans cluster output with length of nClusts
+    # ps, list of plots of the clusters against first 2 principle components
+runClusts = function(toClust, nClusts, print=TRUE, maxClusts=15, seed=16, nstart=10, iter.max=100){
+  if(length(nClusts)>4){
+    warning("Using only first 4 elements of nClusts.")
+  }
+  kms=list(); ps=list();
+  for(i in 1:length(nClusts)){
+    kms[[i]] = kmeans(toClust,nClusts[i],iter.max = iter.max, nstart=nstart)
+    ps[[i]] = fviz_cluster(kms[[i]], geom = "point", data = toClust) + ggtitle(paste("k =",nClusts[i]))
+    
+  }
+  library(gridExtra)
+  if(print){
+    tmp = marrangeGrob(ps, nrow = 2,ncol=2)
+    print(tmp)
+  }
+  list(kms=kms,ps=ps)
+}
+
+plotClust = function(km,toClust,discPlot=FALSE){
+  nc = length(km$size)
+  if(discPlot){par(mfrow=c(2,2))}
+  else {par(mfrow=c(3,1))}
+  percsize = paste(1:nc," = ",format(km$size/sum(km$size)*100,digits=2),"%",sep="")
+  pie(km$size,labels=percsize,col=1:nc)
+  
+  clusplot(toClust, km$cluster, color=TRUE, shade=TRUE,
+           labels=2, lines=0,col.clus=1:nc); #plot clusters against principal components
+  
+  if(discPlot){
+    plotcluster(toClust, km$cluster,col=km$cluster); #plot against discriminant functions ()
+  }
+  rng = range(km$centers)
+  dist = rng[2]-rng[1]
+  locs = km$centers+.05*dist*ifelse(km$centers>0,1,-1)
+  bm = barplot(km$centers,beside=TRUE,col=1:nc,main="Cluster Means",ylim=rng+dist*c(-.1,.1))
+  text(bm,locs,formatC(km$centers,format="f",digits=1))
+}
+# Apply to dataset coef.indi
+clusts = runClusts(coef.indi, c(2,3,4,5), print=TRUE, maxClusts=15, seed=16, nstart=10, iter.max=100)
+# Since the clusts with four and five clusters will have overlap. 
+# Hence, we choose the scheme of three.
+plotClust(clusts[[1]][[2]], coef.indi)
+
+```
+
+############################################PART C######################################################
+In this part, we merged the conjoint dataframe and respondents dataset, and build regression model to conduct a priori segmentation at segment level(age and gender).
+
+We did four regressions, for the first one(attributes, without segmentation), consumers are more sensitive to price and size of the product, and they prefer product with lower price and larger size. Also, consumers tend not interested in the motion and style of the product.
+
+For the second one(attributes, segmented by gender), we find that difference of (1) motion is insignificant, and (2) when taking gender into account, consumer with boys are more sensitive to price compare to those who had girls, and (3) and consumer with girls will be less concern about size and prefers rocking, glamour horse than boys.
+
+For the third one(attributes, segmented by age), we find that the p-value of age, style, and interaction between age and price, age and style are all bigger than 0.05, which indicated they are insignificant. And we also find that by adding interaction variables into the regression, consumer with kids that are in the range of 3-4 year will more concern about the products motion and size compare to those having younger kids. Moreover, consumer will more likely having a larger size toy horse and more prefer having a bouncing horse.
+
+For the last one(attributes, segmented by both gender and age), we find that when taking all possible variables into account, the dataset has been divided into minimal parts that only price affects the general population. Children's age, and gender become factors that affects consumer making decisions while considering motion and style of the product.
+
+Therefore, we thought the regression model reg2 might be the best choice, since only except the motion, all the interactions are significant. Then, we did segment-level Analysis(segmented by gender) and run regression for each segment (male and female) separately. And we conlcude that parents of boys and girls both prefer lower price and large size, but parents of boys tend to buy bouncing motion and racing style toy horse, while parents of girls tend to buy rocking motion and glamour style toy horse. 
+
+On the other hand, our insights are (1) Regession that specifies gender give a more reliable representation on consumer preferences. (2) When including interaction variables within the regression, the coefficients are difficult to interpret, compared to the segmentation group. (3) With segmentations, the regression could be more easily used to interpret specific group of consumers and it is more representive to target certain population.
+
+```{r PART C}
+# Merge the conjoint dataframe and respondents dataset
+cj.comb = merge(cj, respondentData, by = 'ID')
+# Build regression model to conduct a priori segmentation at segment level
+# two segment levels: age, gender
+# In the previous regression, we've already known that the baseline for attributes is 0 by default.
+# The coefficient is interpretable regarding this fact. No need to factorize all variables.
+
+# Regression 1: attributes, without segmentation
+reg1 = lm(ratings ~ price + size + motion + style, data = cj.comb)
+summary(reg1)
+# In general, consumers more prefer product with lower price and larger size. Consumers tend not interested in the motion and style of the product.
+
+# Regression 2: attributes, segmented by gender
+reg2 = lm(ratings ~ price*gender + size*gender + motion*gender + style*gender, data = cj.comb)
+summary(reg2)
+# difference of motion is insignificant
+
+# Regression 3: attributes, segmented by age
+reg3 = lm(ratings ~ price*age + size*age + motion*age + style*age, data = cj.comb)
+summary(reg3)
+# p-value of age, style, and interaction between age and price, age and style: >> 0.05
+# insignificant
+
+# Regression 4: attributes, segmented by both gender and age
+reg4 = lm(ratings ~ price*gender*age + size*gender*age + 
+            motion*gender*age + style*gender*age, data = cj.comb)
+summary(reg4)
+
+# The regression model reg2 might be the best choice.
+
+# Segment-level Analysis: (segmented by gender)
+cj.m = cj.comb[cj.comb$gender==0, ]
+cj.f = cj.comb[cj.comb$gender==1, ]
+
+# Run regression for each segment (male and female) separately
+# For segment male:
+reg.m = lm(ratings ~ price + size + motion + style, data = cj.m)
+# For segment female:
+reg.f = lm(ratings ~ price + size + motion + style, data = cj.f)
+# Build dataframe to store the results
+df.segbygender = as.data.frame(t(data.frame(reg.m$coefficients, reg.f$coefficients)))
+row.names(df.segbygender) = c("male", "female")
+df.segbygender
+
+```
+
+######################################PART D##########################################
+We applied the marketshare function and calculated 10 senarios using the optimal profiles. We assume that the competitor always respond us by lowering price to 119.99 once we 
+launched lower price product. Thus, the competitor will transfer its product from profile 7 to profile 8. We order the scenrios based on the total profit and calculate the profitability of each product. From the result, we decide to choose scenario 9 (launch profile 4 and 16), since this scenario has the highest profit.
+
+```{r part D}
+# Build data.frame for Disaggregate Choice Model---------------------------------------------------
+cj.toDCM = data.frame()
+for (i in 1:max(cj$profile)){
+  for (j in 1:max(cj$ID)){
+    cj.toDCM[j,i] = cj[cj$ID==j & cj$profile==i, ]$ratings
+  }
+}
+
+cj.toDCM.coln = c()
+for (i in 1:max(cj$profile)){
+  cj.toDCM.coln = append(cj.toDCM.coln, paste('Profile', i))
+}
+colnames(cj.toDCM) = cj.toDCM.coln
+head(cj.toDCM)
+
+# Step 1:------------------------------------------------------------------------------------------
+# Disaggregate Choice Model using first choice rule on ratings data
+# Return:
+    # data.frame of decisions with nrow = nrow(cj), ncol = length(scen) 
+    # containing 1 or 0 and each row summing to 1 (one-hot encoding or dummy coded)
+simFCDecisions = function(scen, data, ascend = TRUE){ 
+  inmkt = data[ ,scen]                       # construct the subsetted matrix of options
+  if(ascend){                                # if the highest rating is the best
+    bestOpts = apply(inmkt, 1, which.max)    # identify which option is best = max
+  } else {                                   # else the best rank is the largest number
+    bestOpts = apply(inmkt, 1, which.min)    # identify which option is best = min
+  }
+  ret = as.data.frame(model.matrix(~0 + as.factor(bestOpts))) 
+        #fill to set of options marked 0 or 1
+  names(ret) = names(inmkt)
+  ret
+}
+
+# Step 2:------------------------------------------------------------------------------------------
+# Calculate market shares given the decision matrix
+# Return:
+    # a vector of shares
+calcUnitShares = function(decisions){
+  colSums(decisions)/sum(decisions)     # assumes that total decisions is market size
+}
+
+# Step 3: Combination of step 1 and 2--------------------------------------------------------------
+# Simulate decisions for a market scenario using first choice disaggregate choice model
+# Return:
+    # a vector of shares
+simFCShares = function(scen, data, ascend=TRUE){
+  decs = simFCDecisions(scen, data, ascend)         # determine decisions
+  calcUnitShares(decs)                              # calculate shares and return
+}
+
+# For example:
+# In the current market, two products are provided by EarlyRiders:
+# 18'' Glamour Rocking Horse and 18'' Racing Rocking Horse, which are profile 13 and profile 5
+currentQuo = c(5, 7, 13)
+currentShares = simFCShares(currentQuo, cj.toDCM, ascend=T)
+
+# Step 4:------------------------------------------------------------------------------------------
+# Set up scenarios
+scens = list()
+# scenario: original
+scens[[1]] = c(5,13,7)                # original scenario, do not launch
+# scenarios: withdraw one existing profile and launch one new profile
+scens[[2]] = c(4,5,8)                 # replace profile 13 with 4, competitor respond to low price
+scens[[3]] = c(5,14,8)               # replace profile 13 with 14, competitor respond to low price
+scens[[4]] = c(5,16,8)               # replace profile 13 with 16, competitor respond to low price
+scens[[5]] = c(4,13,8)               # replace profile 5 with 4, competitor respond to low price
+scens[[6]] = c(13,14,8)              # replace profile 5 with 14, competitor respond to low price
+scens[[7]] = c(13,16,8)              # replace profile 5 with 16, competitor respond to low price
+# scenarios: withdraw two existing profiles and launch two new profiles
+scens[[8]] = c(4,14,8)               # replace profile 5 and 13 with 4 and 14, competitor respond to low price
+scens[[9]] = c(4,16,8)               # replace profile 5 and 13 with 4 and 16, competitor respond to low price
+scens[[10]] = c(14,16,8)              # replace profile 5 and 13 with 14 and 16, competitor respond to low price
+
+
+simFCScenarios = function(scenarios, data, ...){
+  res = matrix(nrow=length(scenarios),ncol = length(data))          # sets everything to NA by default
+  for(i in 1:length(scenarios)){                                    # loop over scenarios
+    res[i, scenarios[[i]] ] = simFCShares(scenarios[[i]],data,...)  # calculate market shares and save to right columns in res for the scenario
+  }
+  res = as.data.frame(res); names(res) = names(data)
+  res                                                               # return result table
+}
+scens_res = simFCScenarios(scens, cj.toDCM)[, c(4,5,7,8,13,14,16)]
+scens_res
+
+# Reassign a new data frame to the marketshare
+marketshare = scens_res
+# Assigning NAs with 0 for further computation
+marketshare[is.na(marketshare)] = 0
+for (i in 1:nrow(marketshare)) {
+  marketshare$profit[i] = (marketshare$`Profile 4`[i]*(95.99-29)+marketshare$`Profile 5`[i]*(119.99-33)+marketshare$`Profile 13`[i]*(119.99-33)+
+                          marketshare$`Profile 14`[i]*(95.99-33)+marketshare$`Profile 16`[i]*(95.99-41))*4000 - 
+    rowSums((marketshare[i,c(1:2,5:7)])!=0)*20000-20000/3*rowSums((marketshare[i,c(1,6,7)])!=0)
+  marketshare$profitability[i] = ((marketshare$`Profile 4`[i]*(95.99-29)+marketshare$`Profile 5`[i]*(119.99-33)+marketshare$`Profile 13`[i]*(119.99-33)+
+                                 marketshare$`Profile 14`[i]*(95.99-33)+marketshare$`Profile 16`[i]*(95.99-41))*4000 - 
+    rowSums((marketshare[i,c(1:2,5:7)])!=0)*20000-20000/3*rowSums((marketshare[i,c(1,6,7)])!=0))/((marketshare$`Profile 4`[i]*(95.99-29)+marketshare$`Profile 5`[i]*(119.99-33)+marketshare$`Profile 13`[i]*(119.99-33)+marketshare$`Profile 14`[i]*(95.99-33)+marketshare$`Profile 16`[i]*(95.99-41))*4000)
+}
+
+# Ordering the scenrios based on the total profit
+marketshare[order(marketshare$profit, decreasing = TRUE),]
+
+# The profitability of each product
+# Create an empty dataframe to store profitability of each profile
+profitability = data.frame(matrix(ncol = 5, nrow = 10))
+#Profitability for each profile
+for (i in 1:nrow(marketshare)) {
+  profitability$X1[i] = ((marketshare$`Profile 4`[i]*(95.99-29)*4000)-20000-20000/3)/(marketshare$`Profile 4`[i]*(95.99)*4000)
+  profitability$X4[i] = ((marketshare$`Profile 14`[i]*(95.99-33)*4000)-20000-20000/3)/(marketshare$`Profile 14`[i]*(95.99)*4000)
+  profitability$X5[i] = ((marketshare$`Profile 16`[i]*(95.99-41)*4000)-20000-20000/3)/(marketshare$`Profile 16`[i]*(95.99)*4000)
+  profitability$X2[i] = ((marketshare$`Profile 5`[i]*(119.99-33)*4000)-20000)/(marketshare$`Profile 5`[i]*(119.99)*4000)
+  profitability$X3[i] = ((marketshare$`Profile 13`[i]*(119.99-33)*4000)-20000)/(marketshare$`Profile 13`[i]*(119.99)*4000)
+}
+# Assigning 0 to profile with no marketshare
+profitability[profitability == -Inf] = 0
+# Assigning names
+names(profitability) = c('Profile 4', 'Profile 5', 'Profile 13', 'Profile 14', 'Profile 16')
+profitability
+
+# Combining profit related columns based on scenarios
+prof = cbind(round(profitability,2), marketshare$profitability ,marketshare$profit)
+names(prof) = c('Profile 4', 'Profile 5', 'Profile 13', 'Profile 14', 'Profile 16','Total profitability','Profit')
+prof[order(prof$Profit, decreasing = TRUE),]
+prof
+
+```
