@@ -2,6 +2,38 @@
 
 ---
 
+### E-commerce Cross-sell Optimization Strategy – Digital Marketing Analytics with SQL
+
+**[Download SQL code Appendix on Github](https://github.com/milarliu/milarliu.github.io/blob/master/Ecommerce%20Cross-sell%20Project%20SQL%20Appendix.sql)**
+
+> I worked in an eCommerce Database Analyst role for Maven Fuzzy Factory, an online retailer, with the goal to work with the CEO, the Marketing Director, and the Website Manager to help steer the business. I analyzed and assisted in optimizing marketing channels, measured and tested website conversion performance, and used data to understand the impact of new product launches. I analyzed the trends of session and order volume growth, efficiency improvements, growth in specific channels, and revenue and margin. I also dived deep into the impact of introducing new products, and extracted insights and recommendations accordingly.
+
+> In this project, the revenue was lifted by $50,000+ by designing cross-sell strategy based on page performance analysis and optimization testing. I conducted customer-level clickstream and web pathing analysis, built conversion funnels for marketing campaigns using MySQL. My analytics results helped drive more traffic to company website.
+
+![notebook preview](Ecommerce%20Cross-sell%20Project%20Preview.png)
+
+---
+
+### Aurubis Manufacturing Operation Analysis (Practicum) - Yield Prediction with ML models using Python
+
+**[View Project Report on Github](https://github.com/milarliu/milarliu.github.io/blob/master/Aurubis%20Buffalo%20Report.pdf)**
+
+**[View Project Executive Summary on Github](https://github.com/milarliu/milarliu.github.io/blob/master/Aurubis%20Yield%20Project%20Executive%20Summary.pdf)**
+
+**[View User Interface Prototype on Github](https://aurubis-buffalo-yield.herokuapp.com/)**
+
+**[Download Python code Appendix on Github](https://github.com/milarliu/milarliu.github.io/blob/master/Aurubis%20Yield%20Prediction%20code%20appendix.ipynb)**
+
+> I worked in a team of five to perform operation analysis for Aurubis as the capstone project of MS in Business Analytics program. Aurubis is a manufacturing operation which produces copper and brass strip for use in diversified industries. They currently has initiatives to expand their data analytics systems, focused on bringing data together, across different business system platforms, to perform analysis on more big picture, strategic questions for the business. Aurubis uses 'yield' to quantify the percentage of a product's starting weight that is converted into a finished product to be shipped to customers. The project objective is to improve yield, along with improving the accuracy of predicted yield, which will enhance the scheduling efficiency, on-time delivery performance, as well as the potential to lower production cost and inventory on hand.
+
+> Firstly, we conducted exploratory data analysis (EDA) as descriptive study, looking into yield pattern by various features and combinations of features. Secondly, in order to build predictive model, we performed feature engineering process by calculating the aggregated coil-level yield, storing expected features at same level, and getting dummies for operations and machines sequence. Lasso regression, Ridge regression, and Light Gradient Boosting Machine (light GBM) are three key models we created and focused to evaluate, with light GBM turning out to be the best model with mean absolute error (MAE) lower than 4%.
+
+> With the insights extracted, we drew conclusion and recommendations, including but not limited to better machine allocation, operations to optimize, alloys and width to use, as well as number of slits in producing process. We also constructed a user interface prototype for Aurubis management to assist their data-driven decision-making, where they can input the key features and get the predicted yield using light GBM as output.
+
+![notebook preview](Aurubis%20Yield%20Prediction%20Project%20Preview.png)
+
+---
+
 ### Product Launch Recommendation for EarlyRiders (Toy Horse Manufacturer) - Conjoint Analysis with R
 
 **[View Project Report on Github](https://github.com/milarliu/milarliu.github.io/blob/master/Product%20Launch%20Recommendation%20for%20EarlyRider.pdf)**
